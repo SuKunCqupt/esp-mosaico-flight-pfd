@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d1117">
+<title>飞行表 · 手机定位</title>
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.45 -apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;background:#0d1117;color:#e6edf3;padding:16px 16px 40px}
+h1{font-size:22px;margin:4px 0 12px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:14px;padding:14px;margin:12px 0}
+#go{display:block;width:100%;font-size:26px;font-weight:700;padding:22px;border:0;border-radius:16px;background:#2ea043;color:#fff}
+#go.stop{background:#da3633}
+.row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #21262d}
+.row:last-child{border:0}
+.k{color:#8b949e}.v{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.ok{color:#3fb950}.warn{color:#d29922}.bad{color:#f85149}
+.note{color:#d29922;font-size:14px}
+details summary{font-weight:600;cursor:pointer}
+ol{padding-left:22px;margin:8px 0}
+input{width:100%;font-size:17px;padding:10px;margin:6px 0;border-radius:10px;border:1px solid #30363d;background:#0d1117;color:#e6edf3}
+.btn{display:inline-block;font-size:16px;padding:10px 14px;border-radius:10px;border:0;background:#1f6feb;color:#fff;text-decoration:none;margin:6px 6px 0 0}
+.btn.grey{background:#30363d}
+#secure{display:none}
+</style>
+</head>
+<body>
+<h1>飞行表 · 手机定位</h1>
+<div class="card" id="secure">
+  <b class="bad">这个页面现在不能使用定位</b>
+  <p id="secwhy">浏览器只允许在 HTTPS 安全页面里定位。</p>
+  <p>iPhone 请按下面「iPhone 安装证书」做一次；安卓请确认地址是 <b>https://</b> 开头，并在警告页点「高级 → 继续前往」。</p>
+</div>
+<button id="go">开始定位</button>
+<p class="note">⚠️ 使用时请让本页面一直在前台、屏幕保持亮着。切到别的 App、锁屏或关屏，手机就会停止发送定位，飞行表会显示「信号丢失」。</p>
+<div class="card">
+  <div class="row"><span class="k">飞行表</span><span class="v" id="board">未连接</span></div>
+  <div class="row"><span class="k">定位</span><span class="v" id="gps">未开始</span></div>
+  <div class="row"><span class="k">精度</span><span class="v" id="acc">--</span></div>
+  <div class="row"><span class="k">速度</span><span class="v" id="spd">--</span></div>
+  <div class="row"><span class="k">高度</span><span class="v" id="alt">--</span></div>
+  <div class="row"><span class="k">坐标</span><span class="v" id="pos">--</span></div>
+  <div class="row"><span class="k">已发送</span><span class="v" id="sent">0</span></div>
+  <div class="row"><span class="k">屏幕常亮</span><span class="v" id="wake">--</span></div>
+</div>
+<div class="card">
+<details id="tips">
+<summary>定位不工作？</summary>
+<ol>
+<li>要在户外或窗边，第一次定位可能要等 10–60 秒；速度和高度要等 GPS 真正锁定后才有。</li>
+<li>iPhone：设置 → 隐私与安全性 → 定位服务 → 打开；并把「Safari 浏览器网站」设为「使用 App 期间」。弹窗问「允许定位」时选允许，最好打开「精确位置」。</li>
+<li>安卓：手机设置里打开「位置信息」；Chrome 弹窗问位置权限时选「允许」。如果选错了：点地址栏左边的图标 → 权限 → 位置 → 允许。</li>
+<li>安卓连上飞行表热点后如果提示「此网络无法访问互联网」，请选「保持连接」；网页打不开时，临时关掉「移动数据」再刷新。</li>
+<li>iPhone 微信/QQ 里扫码打开的页面不能定位，请用 Safari 打开；安卓请用 Chrome。</li>
+</ol>
+</details>
+</div>
+<div class="card">
+<details id="cert">
+<summary>iPhone 安装证书（只需一次，可选）</summary>
+<p>大多数 iPhone 在警告页点「显示详细信息 → 访问此网站」后就能定位。如果点了开始定位却没有弹出权限窗口，或者显示「不能使用定位」，就装一下这张只属于这块板子的证书：</p>
+<ol>
+<li>点 <a class="btn" href="/ca.crt">下载证书</a>，弹窗选「允许」。</li>
+<li>打开 设置 → 通用 → VPN与设备管理（或顶部的「已下载描述文件」）→ FlightPFD Local CA → 安装。</li>
+<li>设置 → 通用 → 关于本机 → 最下面「证书信任设置」→ 打开「FlightPFD Local CA」。</li>
+<li>回到 Safari，打开 <b>https://192.168.4.1</b>，地址栏不再报警告。</li>
+</ol>
+<p class="note">这张证书只能用于 192.168.4.1 等板子自己的地址，签发它的私钥生成后已销毁。不用时可在「VPN与设备管理」里删除。</p>
+</details>
+</div>
+<div class="card">
+<details id="wifi">
+<summary>让飞行表连接手机热点 / 家里 Wi-Fi（可选）</summary>
+<p>默认用飞行表自己的热点就行。如果想让手机同时能上网，可以让飞行表连到你手机的个人热点或家里的 Wi-Fi，然后在飞行表屏幕「手机定位」页上看到新的网址。</p>
+<div class="row"><span class="k">当前</span><span class="v" id="sta">--</span></div>
+<input id="ssid" placeholder="Wi-Fi 名称" autocomplete="off" autocapitalize="off">
+<input id="pass" placeholder="密码" type="password" autocomplete="off">
+<button class="btn" id="save">保存并连接</button>
+<button class="btn grey" id="forget">不再连接</button>
+<p class="note" id="wifimsg"></p>
+</details>
+</div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+let watchId=null,last=null,inflight=false,sent=0,okAt=0,wl=null,running=false,lastErr="";
+function set(id,t,c){const e=$(id);e.textContent=t;e.className="v"+(c?" "+c:"");}
+function secureOk(){return window.isSecureContext&&("geolocation" in navigator);}
+if(!secureOk()){$("secure").style.display="block";$("cert").open=true;
+  if(location.protocol!=="https:")$("secwhy").textContent="现在打开的是 http:// 页面。请改用 https://"+location.host+" 打开。";}
+async function wake(){
+  if(!("wakeLock" in navigator)){set("wake","不支持，请手动保持亮屏","warn");return;}
+  try{wl=await navigator.wakeLock.request("screen");set("wake","已开启","ok");
+    wl.addEventListener("release",()=>{if(running)set("wake","已关闭","warn");});}
+  catch(e){set("wake","失败："+e.name,"warn");}
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&running){wake();send(true);}});
+function post(body,timeout){
+  const ac=new AbortController();const tm=setTimeout(()=>ac.abort(),timeout||2500);
+  return fetch("/api/gps",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),cache:"no-store",signal:ac.signal})
+    .then(r=>{clearTimeout(tm);if(!r.ok)throw new Error("HTTP "+r.status);return r.json();});
+}
+function send(force){
+  if(!running||inflight)return;
+  const b={hb:1};
+  if(last){const c=last.coords;Object.assign(b,{t:last.timestamp,age:Math.max(0,Date.now()-last.timestamp),
+    lat:c.latitude,lon:c.longitude,alt:c.altitude,spd:c.speed,hdg:c.heading,acc:c.accuracy,aacc:c.altitudeAccuracy});}
+  inflight=true;
+  post(b).then(j=>{okAt=Date.now();sent++;set("sent",String(sent));set("board","已连接 ✓","ok");if(j&&j.sta)showSta(j);})
+    .catch(()=>{set("board","连不上飞行表（确认连着飞行表热点）","bad");})
+    .finally(()=>{inflight=false;});
+}
+function fmt(v,d){return (v===null||v===undefined||isNaN(v))?"--":v.toFixed(d);}
+function onPos(p){
+  last=p;const c=p.coords;
+  set("gps","定位中 ✓","ok");
+  set("acc","±"+fmt(c.accuracy,0)+" 米"+(c.accuracy>50?"（较差，请到户外）":""),c.accuracy>50?"warn":"");
+  set("spd",(c.speed===null||c.speed<0||isNaN(c.speed))?"--（由位置推算）":fmt(c.speed*3.6,1)+" km/h");
+  set("alt",c.altitude===null?"--（暂无）":fmt(c.altitude,0)+" 米");
+  set("pos",fmt(c.latitude,5)+", "+fmt(c.longitude,5));
+  send(true);
+}
+function onErr(e){
+  let m="定位失败："+e.message;
+  if(e.code===1){m=secureOk()?"没有定位权限：请在弹窗选允许（见下方「定位不工作？」）":"浏览器不允许此页面定位";$("tips").open=true;}
+  else if(e.code===2)m="暂时拿不到位置（到户外再试）";
+  else if(e.code===3)m="定位超时，继续等待…";
+  set("gps",m,e.code===3?"warn":"bad");
+}
+function start(){
+  if(!secureOk()){$("secure").style.display="block";$("cert").open=true;return;}
+  running=true;$("go").textContent="停止定位";$("go").classList.add("stop");
+  set("gps","等待定位…（第一次可能要等一会）","warn");
+  watchId=navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:0,timeout:20000});
+  wake();send(true);
+}
+function stop(){
+  running=false;if(watchId!==null)navigator.geolocation.clearWatch(watchId);watchId=null;
+  if(wl){wl.release().catch(()=>{});wl=null;}
+  $("go").textContent="开始定位";$("go").classList.remove("stop");set("gps","已停止");set("wake","--");
+}
+$("go").onclick=()=>running?stop():start();
+setInterval(()=>{send(false);if(running&&okAt&&Date.now()-okAt>4000)set("board","信号丢失，正在重连…","bad");},500);
+function showSta(j){
+  const s={off:"未设置",connecting:"连接中："+j.sta_ssid,connected:"已连接 "+j.sta_ssid+"，网址 https://"+j.sta_ip,failed:"连接失败："+j.sta_ssid}[j.sta]||j.sta;
+  set("sta",s,j.sta==="connected"?"ok":j.sta==="failed"?"bad":"");
+}
+function info(){fetch("/api/info",{cache:"no-store"}).then(r=>r.json()).then(j=>{showSta(j);if(j.ap)document.title="飞行表 · "+j.ap;}).catch(()=>{});}
+info();setInterval(()=>{if(!running)info();},5000);
+function wifi(body){
+  $("wifimsg").textContent="提交中…";
+  fetch("/api/wifi",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),cache:"no-store"})
+    .then(r=>r.json()).then(j=>{$("wifimsg").textContent=j.msg||"好了";setTimeout(info,3000);})
+    .catch(()=>{$("wifimsg").textContent="提交失败";});
+}
+$("save").onclick=()=>{const s=$("ssid").value.trim();if(!s){$("wifimsg").textContent="请填写 Wi-Fi 名称";return;}
+  wifi({ssid:s,pass:$("pass").value});$("pass").value="";};
+$("forget").onclick=()=>wifi({forget:true});
+</script>
+</body>
+</html>

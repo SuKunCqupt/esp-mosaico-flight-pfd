@@ -1,0 +1,14 @@
+{
+  "schema": "raylib-lite-game-sim/v1",
+  "sources": [
+    "main/game_entry.c",
+    "components/app_game_runtime/app_game_runtime.c",
+    "components/app_pfd/pfd_gfx.c",
+    "components/app_pfd/pfd_view.c",
+    "components/app_pfd/pfd_font_data.c",
+    "components/app_sensors/sensors_host.c",
+    "components/app_pfd/qrcodegen.c",
+    "components/app_link/link_core.c",
+    "components/app_link/link_host.c"
+  ]
+}

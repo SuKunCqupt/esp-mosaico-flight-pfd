@@ -1,0 +1,57 @@
+# Build outputs and downloaded dependencies
+build/
+build_*/
+build-*/
+cmake-build-*/
+managed_components/
+# dependencies.lock is versioned so managed_components can be restored
+sdkconfig
+sdkconfig.old
+sdkconfig.backup
+sdkconfig.local.defaults
+compile_commands.json
+CMakeFiles/
+CMakeCache.txt
+.ninja_*
+*.o
+*.obj
+*.elf
+*.map
+*.irisfw
+
+# Local runtimes and caches
+.venv*/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.cache/
+*.log
+*.tmp
+
+# Local credentials (example configuration remains versioned)
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Editors and operating systems
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Keep sdkconfig*.defaults, idf_component.yml and source assets versioned.
+
+# HTTPS identity generated per build owner by tools/gen_cert.sh
+components/app_link/certs/
+# Board-manager code generated at build time
+components/gen_bmgr_codes/
+*.crt
+*.der
+*.ppm
